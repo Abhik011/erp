@@ -215,19 +215,19 @@ export default function CustomerProfile() {
       {tab === "createDeal" && (
         <div className="bg-white border rounded-xl p-6 space-y-4 max-w-xl">
 
-          <Input placeholder="Project Name" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+          <Input placeholder="Project Name" value={form.title} onChange={(v: string) => setForm({ ...form, title: v })} />
 
-          <Input placeholder="Service" value={form.service} onChange={(v) => setForm({ ...form, service: v })} />
+          <Input placeholder="Service" value={form.service} onChange={(v: string) => setForm({ ...form, service: v })} />
 
-          <Input type="number" placeholder="Budget ₹" value={form.value} onChange={(v) => setForm({ ...form, value: v })} />
+          <Input type="number" placeholder="Budget ₹" value={form.value} onChange={(v: string) => setForm({ ...form, value: v })} />
 
-          <Input type="date" value={form.deadline} onChange={(v) => setForm({ ...form, deadline: v })} />
+          <Input type="date" value={form.deadline} onChange={(v: string) => setForm({ ...form, deadline: v })} />
 
           <textarea
             className="w-full border p-2 rounded"
             placeholder="Notes"
             value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({ ...form, notes: e.target.value })}
           />
 
           <button

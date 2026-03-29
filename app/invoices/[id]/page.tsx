@@ -505,7 +505,7 @@ export default function InvoiceView() {
                                 <div style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>{agency.name || "CREONOX TECHNOLOGIES"}</div>
                                 <div style={{ color: "#bbb", fontSize: 12, marginTop: 2 }}>{agency.tagline}</div>
                                 <div style={{ color: "#bbb", fontSize: 11, marginTop: 6, lineHeight: 1.6 }}>
-                                    {(agency?.address || "").split("\n").map((l, i) => (
+                                    {(agency?.address || "").split("\n").map((l:string, i:number) => (
                                         <div key={i}>{l}</div>
                                     ))}
                                     <div style={{ fontSize: 11, color: "#bbb" }}>
