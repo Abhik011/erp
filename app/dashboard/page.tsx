@@ -19,9 +19,11 @@ import {
   Bar
 } from "recharts";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function Dashboard() {
+  const { ready, companyId } = useCompany();
 
   const [stats, setStats] = useState({
     leads: 0,
@@ -36,28 +38,32 @@ export default function Dashboard() {
   const [pipelineData, setPipelineData] = useState<any[]>([]);
 
   useEffect(() => {
+    if (!ready || !companyId) return;
 
-    fetch(`${API}/dashboard/stats`)
-      .then(res => res.json())
+    apiFetch("/dashboard/stats")
+      .then((res) => res.json())
       .then(setStats);
 
-    fetch(`${API}/leads`)
-      .then(res => res.json())
-      .then(data => setRecentLeads(data.slice(0, 5)));
+    apiFetch("/leads")
+      .then((res) => res.json())
+      .then((data) =>
+        setRecentLeads(Array.isArray(data) ? data.slice(0, 5) : [])
+      );
 
-    fetch(`${API}/invoices`)
-      .then(res => res.json())
-      .then(data => setRecentInvoices(data.slice(0, 5)));
+    apiFetch("/invoices")
+      .then((res) => res.json())
+      .then((data) =>
+        setRecentInvoices(Array.isArray(data) ? data.slice(0, 5) : [])
+      );
 
-    fetch(`${API}/dashboard/revenue`)
-      .then(res => res.json())
+    apiFetch("/dashboard/revenue")
+      .then((res) => res.json())
       .then(setRevenueData);
 
-    fetch(`${API}/dashboard/pipeline`)
-      .then(res => res.json())
+    apiFetch("/dashboard/pipeline")
+      .then((res) => res.json())
       .then(setPipelineData);
-
-  }, []);
+  }, [ready, companyId]);
 
   const cards = [
     { title: "Leads", value: stats.leads, icon: UserPlus, color: "bg-blue-100 text-blue-600" },

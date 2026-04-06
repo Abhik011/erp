@@ -2,23 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function InvoicesPage() {
+  const { ready, companyId } = useCompany();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // FETCH
   useEffect(() => {
-    if (!API) return;
+    if (!ready || !companyId) return;
 
-    fetch(`${API}/invoices`)
+    apiFetch("/invoices")
       .then((res) => res.json())
       .then((data) => {
-        const sorted = data.sort(
+        const list = Array.isArray(data) ? data : [];
+        const sorted = list.sort(
           (a: any, b: any) =>
             new Date(b.createdAt).getTime() -
             new Date(a.createdAt).getTime()
@@ -28,7 +29,7 @@ export default function InvoicesPage() {
         setFiltered(sorted);
         setLoading(false);
       });
-  }, []);
+  }, [ready, companyId]);
 
   // SEARCH
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function InvoicesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this invoice?")) return;
 
-    await fetch(`${API}/invoices/${id}`, {
+    await apiFetch(`/invoices/${id}`, {
       method: "DELETE",
     });
 

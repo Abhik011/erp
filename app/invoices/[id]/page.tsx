@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
+
 const GST_RATE = 0.18;
 
 // Merge API data with safe defaults for fields your DB might not have yet
@@ -77,6 +79,7 @@ export default function InvoiceView() {
     const params = useParams();
     const id = params?.id;
     const isNew = id === "new";
+    const { ready, companyId } = useCompany();
     const [invoice, setInvoice] = useState<any>(null);
     const agency = invoice?.agency || {};
     const [loading, setLoading] = useState(true);
@@ -163,22 +166,18 @@ export default function InvoiceView() {
     };
     // ── Fetch invoice ──────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!id || !API) return;
+        if (!id || !ready || !companyId) return;
 
         const loadData = async () => {
             try {
                 setLoading(true);
 
-                // ✅ PARALLEL FETCH
                 const [agencyRes, invoiceRes] = await Promise.all([
-                    fetch(`${API}/agencies`),
-                    id === "new" ? null : fetch(`${API}/invoices/${id}`)
+                    apiFetch("/agencies/default"),
+                    id === "new" ? null : apiFetch(`/invoices/${id}`),
                 ]);
 
-                const agencyDataRaw = await agencyRes.json();
-                const agencyData = Array.isArray(agencyDataRaw)
-                    ? agencyDataRaw[0]
-                    : agencyDataRaw;
+                const agencyData = await agencyRes.json();
 
                 let invoiceData = {};
 
@@ -211,7 +210,7 @@ export default function InvoiceView() {
 
         loadData();
 
-    }, [id]);
+    }, [id, ready, companyId]);
 
     const autoFillCustomer = (c: any) => {
         setInvoice((prev: any) => ({
@@ -362,7 +361,7 @@ export default function InvoiceView() {
 
             delete payload.__v; // 🔥 IMPORTANT
 
-            const res = await fetch(`${API}/invoices/${invoice._id}`, {
+            const res = await apiFetch(`/invoices/${invoice._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

@@ -3,28 +3,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function ProjectsPage() {
   const router = useRouter();
+  const { ready, companyId } = useCompany();
 
   const [projects, setProjects] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // FETCH PROJECTS
   useEffect(() => {
-    fetch(`${API}/projects`)
+    if (!ready || !companyId) return;
+
+    apiFetch("/projects")
       .then((res) => res.json())
       .then(async (data) => {
-        // 🔥 attach progress
+        const list = Array.isArray(data) ? data : [];
         const withProgress = await Promise.all(
-          data.map(async (p: any) => {
+          list.map(async (p: any) => {
             try {
-              const res = await fetch(
-                `${API}/projects/${p._id}/progress`
-              );
+              const res = await apiFetch(`/projects/${p._id}/progress`);
               const prog = await res.json();
               return { ...p, progress: prog.progress };
             } catch {
@@ -37,7 +38,7 @@ export default function ProjectsPage() {
         setFiltered(withProgress);
         setLoading(false);
       });
-  }, []);
+  }, [ready, companyId]);
 
   // SEARCH
   useEffect(() => {

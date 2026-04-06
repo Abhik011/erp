@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 type Customer = {
   _id: string;
@@ -13,26 +14,23 @@ type Customer = {
 };
 
 export default function CustomersPage() {
+  const { ready, companyId } = useCompany();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!API) {
-      setError("API URL not configured");
-      setLoading(false);
-      return;
-    }
+    if (!ready || !companyId) return;
 
-    fetch(`${API}/customers`)
+    apiFetch("/customers")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch customers");
         return res.json();
       })
-      .then((data) => setCustomers(data))
+      .then((data) => setCustomers(Array.isArray(data) ? data : []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [ready, companyId]);
 
   return (
     <div className=" mx-auto p-6 space-y-6">

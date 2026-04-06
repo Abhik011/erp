@@ -2,36 +2,37 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { DM_Sans, DM_Mono } from "next/font/google";
+import { CompanyProvider } from "@/components/CompanyProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Creonox CRM",
-    template: "%s | Creonox CRM",
+    default: "Nexora",
+    template: "%s | Nexora",
   },
   description:
-    "Creonox CRM is a company relationship and operations management platform to manage clients, leads, invoices, deals, and internal operations.",
+    "Nexora is a modern SaaS platform to manage leads, clients, invoices, deals, and complete business operations in one place.",
   keywords: [
-    "CRM",
-    "Creonox CRM",
-    "Customer Relationship Management",
+    "Nexora",
+    "ERP SaaS",
     "Business Management Software",
-    "Company Operations Platform",
+    "CRM ERP Platform",
+    "Operations Management System",
   ],
-  authors: [{ name: "Creonox" }],
+  authors: [{ name: "Creonox" }], // keep company credit
   creator: "Creonox",
-  metadataBase: new URL("https://crm.creonox.com"),
+  metadataBase: new URL("https://crm.creonox.com"), // ✅ unchanged
 
   openGraph: {
-    title: "Creonox CRM",
+    title: "Nexora",
     description:
-      "Manage leads, customers, invoices, and company operations with Creonox CRM.",
-    url: "https://crm.creonox.com",
-    siteName: "Creonox CRM",
+      "Run your entire business with Nexora — manage leads, customers, invoices, and operations seamlessly.",
+    url: "https://crm.creonox.com", // ✅ unchanged
+    siteName: "Nexora",
     type: "website",
   },
 
   icons: {
-    icon: "/logo.png",
+    icon: "/logo.png", // you can replace later with Nexora logo
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
@@ -46,7 +47,7 @@ const dmSans = DM_Sans({
 // ✅ MONO FONT
 const dmMono = DM_Mono({
   subsets: ["latin"],
-   weight: ["400", "500"],
+  weight: ["400", "500"],
   variable: "--font-mono",
 });
 
@@ -58,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.className} ${dmMono.variable} bg-[#f9f9f7]`}>
-        {children}
+        <CompanyProvider>{children}</CompanyProvider>
       </body>
     </html>
   );

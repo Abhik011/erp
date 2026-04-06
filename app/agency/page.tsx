@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function AgencyPage() {
+  const { ready, companyId, refreshCompanies, selectCompany } = useCompany();
   const [agency, setAgency] = useState<any>(null);
   const [edit, setEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // LOAD
   useEffect(() => {
-    fetch(`${API}/agencies/default`)
+    if (!ready || !companyId) return;
+    setLoading(true);
+    apiFetch("/agencies/default")
       .then((res) => res.json())
       .then((data) => {
         setAgency({
@@ -22,7 +24,7 @@ export default function AgencyPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [ready, companyId]);
 
   const setField = (field: string, value: any) => {
     setAgency((prev: any) => ({ ...prev, [field]: value }));
@@ -47,11 +49,11 @@ export default function AgencyPage() {
 
     try {
       const method = agency._id ? "PUT" : "POST";
-      const url = agency._id
-        ? `${API}/agencies/${agency._id}`
-        : `${API}/agencies`;
+      const path = agency._id
+        ? `/agencies/${agency._id}`
+        : "/agencies";
 
-      const res = await fetch(url, {
+      const res = await apiFetch(path, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(agency),
@@ -60,6 +62,10 @@ export default function AgencyPage() {
       const data = await res.json();
       setAgency(data);
       setEdit(false);
+      if (method === "POST" && data._id) {
+        await refreshCompanies();
+        selectCompany(data._id);
+      }
 
     } catch {
       alert("Failed to save");

@@ -11,7 +11,7 @@
   --bg: #f6f6f6;
   --sidebar-bg: #e8e4de;
   --white: #ffffff;
-  --yellow: #e8c832;
+  --yellow: #f7e414;
   --yellow-dark: #c9aa1a;
   --gray-dark: #3a3a3a;
   --gray-mid: #6b6b6b;
@@ -34,7 +34,50 @@ body {
 .mono {
   font-family: var(--font-mono);
 }
+/* FORM INPUT SYSTEM */
+.input {
+  border: 1px solid var(--gray-border);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: all 0.15s ease;
+  color: var(--text-main);
+}
 
+.input::placeholder {
+  color: var(--gray-light);
+}
+
+.input:focus {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 2px rgba(232, 200, 50, 0.25);
+}
+
+.btn-primary {
+  background: var(--yellow);
+  color: #1a1a1a;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--yellow-dark);
+}
+
+.btn-secondary {
+  border: 1px solid var(--gray-border);
+  background: var(--white);
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--gray-mid);
+}
 /* SIDEBAR */
 .sidebar {
   width: var(--sidebar-w);

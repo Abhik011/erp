@@ -3,28 +3,30 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function DealsPage() {
   const router = useRouter();
+  const { ready, companyId } = useCompany();
 
   const [deals, setDeals] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // FETCH
   useEffect(() => {
-    if (!API) return;
+    if (!ready || !companyId) return;
 
-    fetch(`${API}/deals`)
+    apiFetch("/deals")
       .then((res) => res.json())
       .then((data) => {
-        setDeals(data);
-        setFiltered(data);
+        const list = Array.isArray(data) ? data : [];
+        setDeals(list);
+        setFiltered(list);
         setLoading(false);
       });
-  }, []);
+  }, [ready, companyId]);
 
   // SEARCH
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function DealsPage() {
     if (!confirm("Delete this deal?")) return;
 
     try {
-      await fetch(`${API}/deals/${id}`, {
+      await apiFetch(`/deals/${id}`, {
         method: "DELETE",
       });
 

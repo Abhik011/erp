@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 import {
   LineChart,
   Line,
@@ -12,27 +14,28 @@ import {
   Bar
 } from "recharts";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
-
 export default function ReportsPage() {
+  const { ready, companyId } = useCompany();
   const [yearData, setYearData] = useState<any>(null);
   const [monthData, setMonthData] = useState<any>(null);
 
   const year = new Date().getFullYear();
 
   useEffect(() => {
-    fetch(`${API}/reports/financial-year?year=${year}`)
+    if (!ready || !companyId) return;
+
+    apiFetch(`/reports/financial-year?year=${year}`)
       .then((res) => res.json())
       .then(setYearData);
 
-    fetch(
-      `${API}/reports/monthly?year=${year}&month=${
+    apiFetch(
+      `/reports/monthly?year=${year}&month=${
         new Date().getMonth() + 1
       }`
     )
       .then((res) => res.json())
       .then(setMonthData);
-  }, []);
+  }, [ready, companyId, year]);
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-IN").format(n || 0);

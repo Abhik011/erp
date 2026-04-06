@@ -1,29 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 const columns = ["Todo", "In Progress", "Done"];
 
-export default function ProjectTasks({ params }: any) {
-
+export default function ProjectTasks({ params }: { params: { id: string } }) {
+  const { ready, companyId } = useCompany();
   const [tasks, setTasks] = useState<any[]>([]);
   const [progress, setProgress] = useState(0);
 
   const fetchData = async () => {
-    const res = await fetch(`${API}/tasks/project/${params.id}`);
+    const res = await apiFetch(`/tasks/project/${params.id}`);
     const data = await res.json();
-    setTasks(data);
+    setTasks(Array.isArray(data) ? data : []);
 
-    const p = await fetch(`${API}/projects/${params.id}/progress`);
+    const p = await apiFetch(`/projects/${params.id}/progress`);
     const pdata = await p.json();
-    setProgress(pdata.progress);
+    setProgress(pdata.progress ?? 0);
   };
 
   useEffect(() => {
+    if (!ready || !companyId || !params.id) return;
     fetchData();
-  }, []);
+  }, [params.id, ready, companyId]);
 
   // 🔥 DRAG START
   const onDragStart = (e: any, id: string) => {
@@ -34,7 +35,7 @@ export default function ProjectTasks({ params }: any) {
   const onDrop = async (e: any, status: string) => {
     const id = e.dataTransfer.getData("taskId");
 
-    await fetch(`${API}/tasks/${id}`, {
+    await apiFetch(`/tasks/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
@@ -100,7 +101,7 @@ export default function ProjectTasks({ params }: any) {
                   <input
                     value={task.assignedTo || ""}
                     onChange={async (e) => {
-                      await fetch(`${API}/tasks/${task._id}`, {
+                      await apiFetch(`/tasks/${task._id}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -116,7 +117,7 @@ export default function ProjectTasks({ params }: any) {
                   {/* TIME TRACK */}
                   <button
                     onClick={async () => {
-                      await fetch(`${API}/tasks/${task._id}`, {
+                      await apiFetch(`/tasks/${task._id}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

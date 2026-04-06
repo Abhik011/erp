@@ -1,158 +1,182 @@
 "use client";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useState } from "react";
 
 export default function LeadsTable({ leads, refresh }: any) {
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
+  const deleteLead = async (id: string) => {
+    await apiFetch(`/leads/${id}`, { method: "DELETE" });
+    refresh();
+  };
   const changeStatus = async (id: string, status: string) => {
-    await fetch(`${API}/leads/${id}/status`, {
+    await apiFetch(`/leads/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status }),
     });
     refresh();
-  };
-
-  const convertLead = async (id: string) => {
-    await fetch(`${API}/leads/${id}/convert`, {
-      method: "POST"
-    });
-    refresh();
-  };
-
-  const statusColor = (status: string) => {
-    if (status === "New") return "bg-blue-100 text-blue-700";
-    if (status === "Contacted") return "bg-yellow-100 text-yellow-700";
-    if (status === "Negotiation") return "bg-orange-100 text-orange-700";
-    if (status === "Qualified") return "bg-purple-100 text-purple-700";
-    if (status === "Converted") return "bg-green-100 text-green-700";
-    if (status === "Lost") return "bg-gray-200 text-gray-600";
-    return "bg-gray-100 text-gray-600";
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="w-full h-full bg-white rounded-2xl border border-gray-200 overflow-hidden">
 
-      <table className="w-full text-sm">
+      {/* TABLE SCROLL */}
+      <div className="h-full overflow-auto">
 
-        {/* HEADER */}
-        <thead className="bg-[#f9f9f7] text-black text-xs">
-          <tr>
-            <th className="text-left px-4 py-3 font-medium">Lead</th>
-            <th className="text-left px-4 font-medium">Company</th>
-            <th className="text-left px-4 font-medium">Contact</th>
-            <th className="text-left px-4 font-medium">Source</th>
-            <th className="text-left px-4 font-medium">Status</th>
-            <th className="text-left px-4 font-medium">Actions</th>
-          </tr>
-        </thead>
+        <table className="w-full min-w-[1100px] text-sm">
 
-        {/* BODY */}
-        <tbody>
+          {/* HEADER */}
+          <thead className="bg-gray-50 border-b sticky top-0 z-10">
+            <tr className="text-left text-xs text-gray-500 uppercase">
 
-          {leads.map((lead: any) => (
-            <tr
-              key={lead._id}
-              className={`border-t transition hover:bg-gray-50`}
-            >
-
-              {/* LEAD */}
-              <td className="px-4 py-3 flex items-center gap-3">
-
-                <div className="w-9 h-9 bg-gray-100 text-gray-700 flex items-center justify-center rounded-full text-sm font-semibold">
-                  {lead.name?.charAt(0)}
-                </div>
-
-                <div>
-                  <p className="font-medium text-gray-900 text-sm">
-                    {lead.name}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {lead.email}
-                  </p>
-                </div>
-
-              </td>
-
-              {/* COMPANY */}
-              <td className="px-4 text-gray-700 text-sm">
-                {lead.company || "-"}
-              </td>
-
-              {/* PHONE */}
-              <td className="px-4 text-gray-500 text-sm">
-                {lead.phone || "-"}
-              </td>
-
-              {/* SOURCE */}
-              <td className="px-4">
-                {lead.source ? (
-                  <span className="text-gray-600 text-xs px-2 py-1 ">
-                    {lead.source}
-                  </span>
-                ) : "-"}
-              </td>
-
-              {/* STATUS */}
-              <td className="px-4">
-                <span
-                  className={`px-2 py-1 text-xs rounded-full font-medium ${statusColor(
-                    lead.status
-                  )}`}
-                >
-                  {lead.status}
-                </span>
-              </td>
-
-              {/* ACTIONS */}
-              <td className="px-4 py-3">
-
-                <div className="flex items-center gap-2">
-
-                  {/* STATUS SELECT */}
-                  <select
-                    value={lead.status}
-                    onChange={(e) =>
-                      changeStatus(lead._id, e.target.value)
-                    }
-                    disabled={lead.status === "Converted"}
-                    className="border border-gray-200 text-xs px-2 py-1 rounded-lg bg-white"
-                  >
-                    <option>New</option>
-                    <option>Contacted</option>
-                    <option>Negotiation</option>
-                    <option>Qualified</option>
-                    <option>Lost</option>
-                  </select>
-
-                  {/* CONVERT BUTTON */}
-                  {lead.status === "Qualified" && (
-                    <button
-                      onClick={() => convertLead(lead._id)}
-                      className="bg-black text-white text-xs px-3 py-1 rounded-lg hover:opacity-90"
-                    >
-                      Convert
-                    </button>
-                  )}
-
-                  {/* CONVERTED */}
-                  {/* {lead.status === "Converted" && (
-                    <span className="text-green-600 text-xs font-medium">
-                     Converted
-                    </span>
-                  )} */}
-
-                </div>
-
-              </td>
+              <th className="px-4 py-3">Company</th>
+              <th className="px-4 py-3">Contact</th>
+              <th className="px-4 py-3">Phone</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Source</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Notes</th>
+              <th className="px-4 py-3">Created</th>
+              <th className="px-4 py-3 text-right">Actions</th>
 
             </tr>
-          ))}
+          </thead>
 
-        </tbody>
+          {/* BODY */}
+          <tbody>
 
-      </table>
+            {leads.map((lead: any) => (
 
+              <tr
+                key={lead._id}
+                className="border-b hover:bg-gray-50 transition"
+              >
+
+                {/* COMPANY */}
+                <td className="px-4 py-3 font-medium text-gray-900">
+                  {lead.companyName || "-"}
+                </td>
+
+                {/* CONTACT */}
+                <td className="px-4 py-3">
+                  {lead.name || "-"}
+                </td>
+
+                {/* PHONE */}
+                <td className="px-4 py-3 text-gray-600">
+                  {lead.phone || "-"}
+                </td>
+
+                {/* EMAIL */}
+                <td className="px-4 py-3 text-gray-600">
+                  {lead.email || "-"}
+                </td>
+
+                {/* SOURCE */}
+                <td className="px-4 py-3 text-gray-600">
+                  {lead.source || "-"}
+                </td>
+
+                {/* STATUS */}
+                <td className="px-4 py-3">
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100">
+                    {lead.status}
+                  </span>
+                </td>
+
+                {/* NOTES */}
+                <td className="px-4 py-3 max-w-[200px]">
+                  <p className="text-gray-600 text-xs line-clamp-2">
+                    {lead.notes || "-"}
+                  </p>
+                </td>
+
+                {/* DATE */}
+                <td className="px-4 py-3 text-gray-500 text-xs">
+                  {new Date(lead.createdAt).toLocaleDateString()}
+                </td>
+
+                {/* ACTIONS */}
+                <td className="px-4 py-3 text-right">
+
+                  <div className="relative flex justify-end">
+
+                    {/* 3 DOT BUTTON */}
+                    <button
+                      onClick={() =>
+                        setOpenMenu(openMenu === lead._id ? null : lead._id)
+                      }
+                      className="p-1 rounded hover:bg-gray-100"
+                    >
+                      ⋯
+                    </button>
+
+                    {/* DROPDOWN */}
+                    {openMenu === lead._id && (
+                      <div className="absolute right-0 top-7 w-40 bg-white border rounded-lg shadow-lg z-20">
+
+                        {/* CHANGE STATUS */}
+                        <div className="px-3 py-2 text-xs text-gray-500 border-b">
+                          Change Status
+                        </div>
+
+                        {["New", "Contacted", "Negotiation", "Qualified", "Converted", "Lost"].map(
+                          (status) => (
+                            <button
+                              key={status}
+                              onClick={() => {
+                                changeStatus(lead._id, status);
+                                setOpenMenu(null);
+                              }}
+                              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                            >
+                              {status}
+                            </button>
+                          )
+                        )}
+
+                        <div className="border-t my-1" />
+
+                        {/* EDIT */}
+                        <button
+                          onClick={() => {
+                            openEdit(lead);
+                            setOpenMenu(null);
+                          }}
+                          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                        >
+                          ✏️ Edit
+                        </button>
+
+                        {/* DELETE */}
+                        <button
+                          onClick={() => {
+                            deleteLead(lead._id);
+                            setOpenMenu(null);
+                          }}
+                          className="block w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                        >
+                          🗑 Delete
+                        </button>
+
+                      </div>
+                    )}
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
     </div>
   );
 }

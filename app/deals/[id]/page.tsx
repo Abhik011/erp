@@ -3,32 +3,33 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function DealView() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id;
+  const { ready, companyId } = useCompany();
 
   const [deal, setDeal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // ── Fetch deal ───────────────────────────────
   useEffect(() => {
-    if (!API || !id) return;
+    if (!ready || !companyId || !id) return;
 
-    fetch(`${API}/deals/${id}`)
+    apiFetch(`/deals/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setDeal(data);
         setLoading(false);
       });
-  }, [id]);
+  }, [id, ready, companyId]);
 
   // ── Save deal ───────────────────────────────
   const handleSave = async () => {
     try {
-      await fetch(`${API}/deals/${id}`, {
+      await apiFetch(`/deals/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(deal),
@@ -42,7 +43,7 @@ export default function DealView() {
 
   // ── Update status ───────────────────────────
   const updateStatus = async (status: string) => {
-    const res = await fetch(`${API}/deals/${id}/status`, {
+    const res = await apiFetch(`/deals/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

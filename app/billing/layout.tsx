@@ -11,14 +11,14 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f0ede9] flex">
+    <div className="min-h-screen bg-[#f2f2f2] flex">
 
       {/* Sidebar */}
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Content */}
       <main
-        className={`flex-1 transition-all duration-300 ${
+        className={`flex-1 p-8 transition-all duration-300 ${
           collapsed ? "ml-16" : "ml-64"
         }`}
       >

@@ -5,28 +5,32 @@ import LeadsTable from "./LeadsTable";
 import LeadsPipeline from "./LeadsPipeline";
 import LeadFormModal from "./LeadFormModal";
 
-const API = process.env.NEXT_PUBLIC_API_URL;
+import { apiFetch } from "@/lib/api";
+import { useCompany } from "@/components/CompanyProvider";
 
 export default function LeadsPage() {
+  const { ready, companyId } = useCompany();
+
   const [leads, setLeads] = useState<any[]>([]);
   const [view, setView] = useState("table");
   const [showForm, setShowForm] = useState(false);
 
   const fetchLeads = async () => {
-    const res = await fetch(`${API}/leads`);
+    const res = await apiFetch("/leads");
     const data = await res.json();
-    setLeads(data);
+    setLeads(Array.isArray(data) ? data : []);
   };
 
   useEffect(() => {
+    if (!ready || !companyId) return;
     fetchLeads();
-  }, []);
+  }, [ready, companyId]);
 
   return (
-    <div className=" mx-auto p-6 space-y-6">
+    <div className="h-screen flex flex-col px-6 py-5 overflow-hidden">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center">
+      {/* HEADER (FIXED) */}
+      <div className="max-w-7xl flex justify-between items-center mb-4 shrink-0">
 
         <h1 className="text-2xl font-semibold tracking-tight">
           Leads
@@ -41,18 +45,18 @@ export default function LeadsPage() {
 
       </div>
 
-      {/* MAIN CARD */}
-      <div className="bg-white rounded-2xl p-5 ">
+      {/* CARD */}
+      <div className="flex-1 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
 
-        {/* TABS */}
-        <div className="flex gap-2 mb-4 ">
+        {/* TABS (FIXED) */}
+        <div className="flex gap-2 p-4 border-b shrink-0">
 
           <button
             onClick={() => setView("table")}
-            className={`px-4 py-1.5 shadow-sm text-sm rounded-lg transition ${
+            className={`px-4 py-1.5 text-sm rounded-lg transition ${
               view === "table"
-                ? "bg-[#f7e414] text-black"
-                : "text-gray-500 hover:bg-gray-50"
+                ? "bg-[#f7e414] text-black shadow-sm"
+                : "text-gray-500 hover:bg-gray-100"
             }`}
           >
             Table
@@ -60,10 +64,10 @@ export default function LeadsPage() {
 
           <button
             onClick={() => setView("pipeline")}
-            className={`px-4 py-1.5 shadow-sm text-sm rounded-lg transition ${
+            className={`px-4 py-1.5 text-sm rounded-lg transition ${
               view === "pipeline"
-                ? "bg-[#f7e414] text-black"
-                : "text-gray-500 hover:bg-gray-50"
+                ? "bg-[#f7e414] text-black shadow-sm"
+                : "text-gray-500 hover:bg-gray-100"
             }`}
           >
             Pipeline
@@ -71,15 +75,25 @@ export default function LeadsPage() {
 
         </div>
 
-        {/* CONTENT */}
-        <div className="min-h-[300px]">
+        {/* SCROLLABLE CONTENT ONLY */}
+        <div className="flex-1 overflow-hidden">
 
+          {/* TABLE */}
           {view === "table" && (
-            <LeadsTable leads={leads} refresh={fetchLeads} />
+            <div className="h-full overflow-hidden p-4">
+              <LeadsTable leads={leads} refresh={fetchLeads} />
+            </div>
           )}
 
+          {/* PIPELINE */}
           {view === "pipeline" && (
-            <LeadsPipeline leads={leads} />
+            <div className="max-w-6xl h-full overflow-hidden p-4">
+              <LeadsPipeline
+                leads={leads}
+                refresh={fetchLeads}
+                onAddLead={() => setShowForm(true)}
+              />
+            </div>
           )}
 
         </div>
