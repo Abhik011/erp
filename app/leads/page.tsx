@@ -10,7 +10,8 @@ import { useCompany } from "@/components/CompanyProvider";
 
 export default function LeadsPage() {
   const { ready, companyId } = useCompany();
-
+  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
   const [view, setView] = useState("table");
   const [showForm, setShowForm] = useState(false);
@@ -53,22 +54,20 @@ export default function LeadsPage() {
 
           <button
             onClick={() => setView("table")}
-            className={`px-4 py-1.5 text-sm rounded-lg transition ${
-              view === "table"
-                ? "bg-[#f7e414] text-black shadow-sm"
-                : "text-gray-500 hover:bg-gray-100"
-            }`}
+            className={`px-4 py-1.5 text-sm rounded-lg transition ${view === "table"
+              ? "bg-[#f7e414] text-black shadow-sm"
+              : "text-gray-500 hover:bg-gray-100"
+              }`}
           >
             Table
           </button>
 
           <button
             onClick={() => setView("pipeline")}
-            className={`px-4 py-1.5 text-sm rounded-lg transition ${
-              view === "pipeline"
-                ? "bg-[#f7e414] text-black shadow-sm"
-                : "text-gray-500 hover:bg-gray-100"
-            }`}
+            className={`px-4 py-1.5 text-sm rounded-lg transition ${view === "pipeline"
+              ? "bg-[#f7e414] text-black shadow-sm"
+              : "text-gray-500 hover:bg-gray-100"
+              }`}
           >
             Pipeline
           </button>
@@ -81,8 +80,25 @@ export default function LeadsPage() {
           {/* TABLE */}
           {view === "table" && (
             <div className="h-full overflow-hidden p-4">
-              <LeadsTable leads={leads} refresh={fetchLeads} />
+              <LeadsTable
+                leads={leads}
+                refresh={fetchLeads}
+                openEdit={(lead: any) => {
+                  setSelectedLead(lead);
+                  setEditModalOpen(true);
+                }}
+              />
             </div>
+          )}
+          {editModalOpen && selectedLead && (
+            <LeadFormModal
+              lead={selectedLead}
+              close={() => {
+                setEditModalOpen(false);
+                setSelectedLead(null);
+              }}
+              refresh={fetchLeads}
+            />
           )}
 
           {/* PIPELINE */}

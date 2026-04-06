@@ -3,7 +3,7 @@
 import { apiFetch } from "@/lib/api";
 import { useState } from "react";
 
-export default function LeadsTable({ leads, refresh }: any) {
+export default function LeadsTable({ leads, refresh,openEdit }: any) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const deleteLead = async (id: string) => {
