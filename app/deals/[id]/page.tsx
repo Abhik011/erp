@@ -49,8 +49,11 @@ export default function DealView() {
       body: JSON.stringify({ status }),
     });
 
-    const updated = await res.json();
-    setDeal(updated);
+
+    setDeal((prev: any) => ({
+      ...prev,
+      status, // only update status
+    }));
   };
 
   const set = (field: string, value: any) =>
@@ -59,91 +62,102 @@ export default function DealView() {
   if (loading) return <div style={{ padding: 40 }}>Loading deal...</div>;
   if (!deal) return null;
 
-  return (
-    <div style={{ padding: 30, fontFamily: "IBM Plex Sans", maxWidth: 800, margin: "0 auto" }}>
+return (
+  <div className="max-w-4xl mx-auto p-6">
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700 }}>
-          {deal.title}
-        </h2>
+    {/* CARD */}
+    <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {deal.title || "Untitled Deal"}
+          </h2>
+          <p className="text-sm text-gray-500">
+            Manage deal details & progress
+          </p>
+        </div>
 
         <button
           onClick={() => router.push("/deals")}
-          style={{
-            border: "1px solid #ddd",
-            padding: "6px 12px",
-            borderRadius: 8,
-            background: "#fff",
-            cursor: "pointer",
-          }}
+          className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50"
         >
           ← Back
         </button>
       </div>
 
-      {/* Status */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        {["New", "Proposal Sent", "In Progress", "Completed", "Won", "Lost"].map((s) => (
-          <button
-            key={s}
-            onClick={() => updateStatus(s)}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 999,
-              border: "none",
-              cursor: "pointer",
-              fontSize: 12,
-              background: deal.status === s ? "#1a1a1a" : "#eee",
-              color: deal.status === s ? "#fff" : "#555",
-            }}
-          >
-            {s}
-          </button>
-        ))}
+      {/* STATUS */}
+      <div className="flex flex-wrap gap-2">
+
+        {["New", "Proposal Sent", "In Progress", "Completed", "Won", "Lost"].map((s) => {
+
+          const isActive = deal.status === s;
+
+          const colors: any = {
+            New: "bg-blue-100 text-blue-700",
+            "Proposal Sent": "bg-purple-100 text-purple-700",
+            "In Progress": "bg-yellow-100 text-yellow-700",
+            Completed: "bg-indigo-100 text-indigo-700",
+            Won: "bg-green-100 text-green-700",
+            Lost: "bg-red-100 text-red-600",
+          };
+
+          return (
+            <button
+              key={s}
+              onClick={() => updateStatus(s)}
+              className={`text-xs px-3 py-1.5 rounded-full font-medium transition
+                ${isActive
+                  ? "bg-black text-white"
+                  : `${colors[s]} hover:opacity-80`
+                }
+              `}
+            >
+              {s}
+            </button>
+          );
+        })}
+
       </div>
 
-      {/* Form */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* FORM */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* Title */}
         <input
           value={deal.title || ""}
           onChange={(e) => set("title", e.target.value)}
           placeholder="Deal Title"
-          style={inputStyle}
+          className="input"
         />
 
-        {/* Service */}
         <input
           value={deal.service || ""}
           onChange={(e) => set("service", e.target.value)}
           placeholder="Service"
-          style={inputStyle}
+          className="input"
         />
 
-        {/* Value */}
         <input
           type="number"
           value={deal.value || 0}
           onChange={(e) => set("value", Number(e.target.value))}
           placeholder="Deal Value"
-          style={inputStyle}
+          className="input"
         />
 
-        {/* Deadline */}
         <input
           type="date"
           value={deal.deadline ? deal.deadline.slice(0, 10) : ""}
           onChange={(e) => set("deadline", e.target.value)}
-          style={inputStyle}
+          className="input"
         />
 
-        {/* Priority */}
+        {/* PRIORITY */}
         <select
           value={deal.priority || ""}
           onChange={(e) => set("priority", e.target.value)}
-          style={inputStyle}
+          className="input"
         >
           <option value="">Select Priority</option>
           <option value="High">High</option>
@@ -151,50 +165,43 @@ export default function DealView() {
           <option value="Low">Low</option>
         </select>
 
-        {/* Notes */}
+        {/* EMPTY SPACE FOR ALIGNMENT */}
+        <div />
+
+        {/* NOTES FULL WIDTH */}
         <textarea
           value={deal.notes || ""}
           onChange={(e) => set("notes", e.target.value)}
           placeholder="Notes"
           rows={4}
-          style={{ ...inputStyle, resize: "vertical" }}
+          className="input md:col-span-2 resize-none"
         />
 
       </div>
 
-      {/* Actions */}
-      <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+      {/* ACTIONS */}
+      <div className="flex justify-between items-center pt-4 border-t border-gray-200 ">
+
         <button
           onClick={handleSave}
-          style={{
-            background: "#7c3aed",
-            color: "#fff",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: 8,
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
+          className="bg-violet-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90"
         >
           Save Deal
         </button>
 
         <button
           onClick={() => router.push(`/invoices/new?deal=${deal._id}`)}
-          style={{
-            background: "#111",
-            color: "#fff",
-            border: "none",
-            padding: "10px 20px",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
+          className="bg-black text-white px-5 py-2 rounded-xl text-sm font-medium hover:opacity-90"
         >
           Create Invoice
         </button>
+
       </div>
+
     </div>
-  );
+
+  </div>
+);
 }
 
 const inputStyle = {

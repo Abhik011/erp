@@ -116,7 +116,7 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <div className="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-500 space-y-1">
+            <div className="mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500 space-y-1">
               <p>
                 Leads / customers: {fmtLimit(plan.limits.leads)} /{" "}
                 {fmtLimit(plan.limits.customers)}

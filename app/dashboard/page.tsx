@@ -36,6 +36,27 @@ export default function Dashboard() {
   const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [revenueData, setRevenueData] = useState<any[]>([]);
   const [pipelineData, setPipelineData] = useState<any[]>([]);
+  const [range, setRange] = useState<"day" | "week" | "month" | "year">("month");
+  const formatShort = (num: number) => {
+    if (!num) return "0";
+
+    const format = (val: number, suffix: string) =>
+      (val % 1 === 0 ? val : val.toFixed(1)) + suffix;
+
+    // Billion
+    if (num >= 1_000_000_000) return format(num / 1_000_000_000, "B");
+
+    // Million
+    if (num >= 1_000_000) return format(num / 1_000_000, "M");
+
+    // Lakh (Indian)
+    if (num >= 100_000) return format(num / 100_000, "L");
+
+    // Thousand
+    if (num >= 1_000) return format(num / 1_000, "K");
+
+    return num.toString();
+  };
 
   useEffect(() => {
     if (!ready || !companyId) return;
@@ -56,22 +77,49 @@ export default function Dashboard() {
         setRecentInvoices(Array.isArray(data) ? data.slice(0, 5) : [])
       );
 
-    apiFetch("/dashboard/revenue")
+    apiFetch(`/dashboard/revenue?range=${range}`)
       .then((res) => res.json())
       .then(setRevenueData);
 
     apiFetch("/dashboard/pipeline")
       .then((res) => res.json())
       .then(setPipelineData);
-  }, [ready, companyId]);
+  }, [ready, companyId, range]);
 
   const cards = [
     { title: "Leads", value: stats.leads, icon: UserPlus, color: "bg-blue-100 text-blue-600" },
     { title: "Customers", value: stats.customers, icon: Users, color: "bg-purple-100 text-purple-600" },
-    { title: "Revenue", value: `₹${stats.revenue}`, icon: IndianRupee, color: "bg-green-100 text-green-600" },
+    { title: "Revenue", value: `₹ ${formatShort(stats.revenue)}`, icon: IndianRupee, color: "bg-green-100 text-green-600" },
     { title: "Invoices", value: stats.invoices, icon: FileText, color: "bg-orange-100 text-orange-600" }
   ];
-
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'pending':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'overdue':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'partial':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'PAID';
+      case 'pending':
+        return 'PENDING';
+      case 'overdue':
+        return 'OVERDUE';
+      case 'partial':
+        return 'PARTIAL';
+      default:
+        return 'DRAFT';
+    }
+  };
   return (
     <div className=" mx-auto p-6 space-y-8 bg-[#f2f2f2]space-y-8">
       {/* HEADER */}
@@ -119,22 +167,41 @@ export default function Dashboard() {
             <h2 className="font-medium text-sm text-gray-700">
               Revenue Trend
             </h2>
-            <span className="text-xs text-gray-400">
-              This Month
-            </span>
+            <div className="flex gap-2 text-xs">
+
+              {["day", "week", "month", "year"].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRange(r as any)}
+                  className={`px-2 py-1 rounded-md transition ${range === r
+                    ? "bg-black text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                    }`}
+                >
+                  {r}
+                </button>
+              ))}
+
+            </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240}>
             <LineChart data={revenueData}>
               <XAxis dataKey="month" stroke="#aaa" fontSize={12} />
               <YAxis stroke="#aaa" fontSize={12} />
-              <Tooltip />
+
+              <Tooltip
+                formatter={(val: any) => `₹ ${val}`}
+                contentStyle={{ borderRadius: 8 }}
+              />
+
               <Line
                 type="monotone"
                 dataKey="revenue"
-                stroke="#111"
+                stroke="#64eb96"   // 🔥 green revenue line
                 strokeWidth={2}
-                dot={false}
+                dot={{ r: 2 }}
+                activeDot={{ r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -188,7 +255,7 @@ export default function Dashboard() {
 
             <tbody>
               {recentLeads.map((lead) => (
-                <tr key={lead._id} className="border-t hover:bg-gray-50">
+                <tr key={lead._id} className="border-t border-gray-200 hover:bg-gray-50">
                   <td className="py-2">{lead.name}</td>
                   <td>{lead.company}</td>
                   <td className="text-gray-500">{lead.status}</td>
@@ -211,17 +278,28 @@ export default function Dashboard() {
             <thead className="text-gray-400 text-xs">
               <tr>
                 <th className="text-left pb-2">Invoice ID</th>
-                <th className="text-left pb-2">Amount</th>
+                <th className="text-left pb-2">Paid Amount</th>
+                <th className="text-left pb-2">Total Amount</th>
                 <th className="text-left pb-2">Status</th>
               </tr>
             </thead>
 
             <tbody>
               {recentInvoices.map((inv) => (
-                <tr key={inv._id} className="border-t hover:bg-gray-50">
+                <tr key={inv._id} className="border-t border-gray-200 hover:bg-gray-50">
                   <td className="py-2">{inv.invoiceNumber}</td>
+                  <td>₹{inv.paidAmount}</td>
                   <td>₹{inv.totalAmount}</td>
-                  <td className="text-gray-500">{inv.paymentStatus}</td>
+
+                  <td>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-none text-xs  border ${getStatusColor(
+                        inv.paymentStatus?.toLowerCase()
+                      )}`}
+                    >
+                      {getStatusLabel(inv.paymentStatus?.toLowerCase())}
+                    </span>
+                  </td>
                 </tr>
               ))}
             </tbody>

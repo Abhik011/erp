@@ -10,6 +10,7 @@ export default function AgencyPage() {
   const [edit, setEdit] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     if (!ready || !companyId) return;
@@ -30,6 +31,21 @@ export default function AgencyPage() {
     setAgency((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  const handleLogoUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await apiFetch("/agencies/logo", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      setField("logo", data.url); // ✅ save S3 URL
+    }
+  };
   const setBank = (field: string, value: any) => {
     setAgency((prev: any) => ({
       ...prev,
@@ -125,13 +141,13 @@ export default function AgencyPage() {
         {/* LOGO */}
         <Section title="Logo">
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 " >
 
             {/* PREVIEW */}
             {agency.logo ? (
               <img
                 src={agency.logo}
-                className="w-14 h-14 rounded-lg object-cover border"
+                className="w-14 h-14 rounded-lg object-cover bg-grey-600  shadow-sm"
               />
             ) : (
               <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm">
@@ -141,12 +157,33 @@ export default function AgencyPage() {
 
             {/* INPUT (ONLY IN EDIT MODE) */}
             {edit && (
-              <input
-                value={agency.logo || ""}
-                onChange={(e) => setField("logo", e.target.value)}
-                placeholder="Paste logo URL (https://...)"
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm"
-              />
+              <div className="flex flex-col gap-2 w-full">
+
+                {/* 🔗 URL INPUT */}
+                <input
+                  value={agency.logo || ""}
+                  onChange={(e) => setField("logo", e.target.value)}
+                  placeholder="Paste logo URL (https://...)"
+                  className={input}
+                />
+
+                {/* 📁 FILE UPLOAD */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    setPreview(URL.createObjectURL(file)); // 👀 instant preview
+                    handleLogoUpload(file);
+                    e.target.value = ""; 
+                  }}
+
+                  className="text-sm"
+                />
+
+              </div>
             )}
 
           </div>
@@ -187,10 +224,21 @@ export default function AgencyPage() {
         </Section>
 
         {/* GST */}
-        <Section title="GST">
+        <Section title="GST" >
           <Field label="GSTIN" value={agency.gstin} edit={edit}>
             <input value={agency.gstin || ""} onChange={(e) => setField("gstin", e.target.value)} className={input} />
           </Field>
+
+
+          <Field label="Place of Supply" value={agency.placeOfSupply} edit={edit}>
+            <input
+              value={agency.placeOfSupply || ""}
+              onChange={(e) => setField("placeOfSupply", e.target.value)}
+              placeholder="e.g. Maharashtra"
+              className={input}
+            />
+          </Field>
+
         </Section>
 
         {/* BANK */}
@@ -216,6 +264,16 @@ export default function AgencyPage() {
             </Field>
           </Grid>
 
+
+          <Field label="UPI ID" value={agency.upiId} edit={edit}>
+            <input
+              value={agency.upiId || ""}
+              onChange={(e) => setField("upiId", e.target.value)}
+              placeholder="yourcompany@upi"
+              className={input}
+            />
+          </Field>
+
         </Section>
 
       </div>
@@ -224,14 +282,16 @@ export default function AgencyPage() {
 }
 
 /* 🔥 COMPONENTS */
-
 function Section({ title, children }: any) {
   return (
-    <div>
+    <div className="pb-6 border-b border-gray-200 last:border-b-0">
       <h2 className="text-sm font-medium text-gray-700 mb-3">
         {title}
       </h2>
-      <div className="space-y-4">{children}</div>
+
+      <div className="space-y-4 uppercase">
+        {children}
+      </div>
     </div>
   );
 }

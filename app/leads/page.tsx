@@ -28,7 +28,7 @@ export default function LeadsPage() {
   }, [ready, companyId]);
 
   return (
-    <div className="h-screen flex flex-col px-6 py-5 overflow-hidden">
+    <div className="h-auto flex flex-col px-6 py-5 overflow-hidden">
 
       {/* HEADER (FIXED) */}
       <div className="max-w-7xl flex justify-between items-center mb-4 shrink-0">
@@ -79,7 +79,7 @@ export default function LeadsPage() {
 
           {/* TABLE */}
           {view === "table" && (
-            <div className="h-full overflow-hidden p-4">
+            <div className="h-auto overflow-hidden p-4">
               <LeadsTable
                 leads={leads}
                 refresh={fetchLeads}

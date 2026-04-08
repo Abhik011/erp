@@ -8,7 +8,7 @@ export default function Home() {
       {/* Navbar */}
       <header className="flex items-center justify-between px-10 py-6 border-b">
         <div className="flex items-center gap-3">
-          <Image src="/logo.png" alt="Creonox CRM" width={36} height={36} />
+          <Image src="/logo.svg" alt="Creonox CRM" width={36} height={36} />
           <h1 className="text-lg font-semibold text-gray-900">
             Creonox CRM
           </h1>
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-8 border-t">
+      <footer className="text-center py-8 border-t border-gray-200 ">
         <p className="text-sm text-gray-500">
           © {new Date().getFullYear()} Creonox
         </p>

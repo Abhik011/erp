@@ -194,7 +194,7 @@ export default function CustomerProfile() {
 
             <tbody>
               {deals.map((d) => (
-                <tr key={d._id} className="border-t hover:bg-gray-50">
+                <tr key={d._id} className="border-t border-gray-200  hover:bg-gray-50">
                   <td className="p-4 font-medium">{d.title}</td>
                   <td>{d.service}</td>
                   <td>₹{d.value}</td>
@@ -242,7 +242,7 @@ export default function CustomerProfile() {
               {quotes.map((q) => (
                 <tr
                   key={q._id}
-                  className="border-t hover:bg-gray-50 cursor-pointer"
+                  className="border-t border-gray-200  hover:bg-gray-50 cursor-pointer"
                   onClick={() => router.push(`/quotes/${q._id}`)}
                 >
                   <td className="p-4 font-medium">{q.quoteNumber}</td>
@@ -307,7 +307,7 @@ export default function CustomerProfile() {
               {invoices.map((i) => (
                 <tr
                   key={i._id}
-                  className="border-t hover:bg-gray-50 cursor-pointer"
+                  className="border-t border-gray-200  hover:bg-gray-50 cursor-pointer"
                   onClick={() => router.push(`/invoices/${i._id}`)}
                 >
                   <td className="p-4 font-medium">{i.invoiceNumber}</td>

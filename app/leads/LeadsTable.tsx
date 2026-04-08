@@ -20,15 +20,15 @@ export default function LeadsTable({ leads, refresh,openEdit }: any) {
   };
 
   return (
-    <div className="w-full h-full bg-white rounded-2xl border border-gray-200 overflow-hidden">
+    <div className="w-full h-auto bg-white rounded-2xl overflow-hidden">
 
       {/* TABLE SCROLL */}
-      <div className="h-full overflow-auto">
+      <div className="h-auto overflow-auto">
 
         <table className="w-full min-w-[1100px] text-sm">
 
           {/* HEADER */}
-          <thead className="bg-gray-50 border-b sticky top-0 z-10">
+          <thead className="bg-gray-50   sticky top-0 z-10">
             <tr className="text-left text-xs text-gray-500 uppercase">
 
               <th className="px-4 py-3">Company</th>
@@ -51,7 +51,7 @@ export default function LeadsTable({ leads, refresh,openEdit }: any) {
 
               <tr
                 key={lead._id}
-                className="border-b hover:bg-gray-50 transition"
+                className="border-b border-gray-200 hover:bg-gray-50 transition"
               >
 
                 {/* COMPANY */}
@@ -118,7 +118,7 @@ export default function LeadsTable({ leads, refresh,openEdit }: any) {
                       <div className="absolute right-0 top-7 w-40 bg-white border rounded-lg shadow-lg z-20">
 
                         {/* CHANGE STATUS */}
-                        <div className="px-3 py-2 text-xs text-gray-500 border-b">
+                        <div className="px-3 py-2 text-xs text-gray-500 border border-gray-200">
                           Change Status
                         </div>
 
@@ -137,7 +137,7 @@ export default function LeadsTable({ leads, refresh,openEdit }: any) {
                           )
                         )}
 
-                        <div className="border-t my-1" />
+                        <div className="border-t border-gray-200  my-1" />
 
                         {/* EDIT */}
                         <button

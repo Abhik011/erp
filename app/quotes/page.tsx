@@ -77,13 +77,27 @@ export default function QuotesPage() {
           + New quote
         </Link>
       </div>
+      <div className="w-[30%]">
+        <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-black/5 transition">
 
-      <input
-        placeholder="Search quotes…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm"
-      />
+          {/* ICON */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z" />
+          </svg>
+          <input
+            placeholder="Search quotes…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full outline-none text-sm placeholder:text-gray-400"
+          />
+        </div>
+      </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         {filtered.length === 0 ? (
@@ -102,7 +116,7 @@ export default function QuotesPage() {
               </thead>
               <tbody>
                 {filtered.map((q) => (
-                  <tr key={q._id} className="border-t hover:bg-gray-50">
+                  <tr key={q._id} className="border-t border-gray-200  hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium">{q.quoteNumber}</td>
                     <td className="px-4 text-gray-600">
                       {q.customerSnapshot?.companyName ||

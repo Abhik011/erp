@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-import { DM_Sans, DM_Mono } from "next/font/google";
+import { DM_Sans, DM_Mono, Geist } from "next/font/google";
 import { CompanyProvider } from "@/components/CompanyProvider";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: {
@@ -32,9 +35,9 @@ export const metadata: Metadata = {
   },
 
   icons: {
-    icon: "/logo.png", // you can replace later with Nexora logo
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo.svg", // you can replace later with Nexora logo
+    shortcut: "/logo.svg",
+    apple: "/logo.svg",
   },
 };
 
@@ -57,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${dmSans.className} ${dmMono.variable} bg-[#f9f9f7]`}>
         <CompanyProvider>{children}</CompanyProvider>
       </body>

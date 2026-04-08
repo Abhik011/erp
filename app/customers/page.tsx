@@ -11,6 +11,8 @@ type Customer = {
   name?: string;
   email?: string;
   phone?: string;
+  companyName?: string;
+  notes?: string;
 };
 
 export default function CustomersPage() {
@@ -79,8 +81,13 @@ export default function CustomersPage() {
             <thead className="bg-[#fafafa] text-gray-500 text-xs">
               <tr>
                 <th className="text-left px-4 py-3 font-medium">Customer</th>
+                <th className="text-left px-4 font-medium">Company name</th>
                 <th className="text-left px-4 font-medium">Email</th>
                 <th className="text-left px-4 font-medium">Phone</th>
+
+                <th className="text-left px-4 font-medium">Notes</th>
+
+
               </tr>
             </thead>
 
@@ -89,7 +96,7 @@ export default function CustomersPage() {
               {customers.map((c) => (
                 <tr
                   key={c._id}
-                  className="border-t hover:bg-gray-50 transition"
+                  className="border-t border-gray-200 hover:bg-gray-50 transition"
                 >
 
                   {/* CUSTOMER */}
@@ -113,7 +120,9 @@ export default function CustomersPage() {
                     </div>
 
                   </td>
-
+                  <td className="px-4 text-gray-600 text-sm">
+                    {c.companyName || "-"}
+                  </td>
                   {/* EMAIL */}
                   <td className="px-4 text-gray-600 text-sm">
                     {c.email || "-"}
@@ -122,6 +131,10 @@ export default function CustomersPage() {
                   {/* PHONE */}
                   <td className="px-4 text-gray-600 text-sm">
                     {c.phone || "-"}
+                  </td>
+
+                  <td className="px-4 text-gray-600 text-sm">
+                    {c.notes || "-"}
                   </td>
 
                 </tr>

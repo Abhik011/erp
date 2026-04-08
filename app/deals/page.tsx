@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { useCompany } from "@/components/CompanyProvider";
 
+
 export default function DealsPage() {
   const router = useRouter();
   const { ready, companyId } = useCompany();
@@ -58,9 +59,28 @@ export default function DealsPage() {
   };
 
   const statusStyle = (status: string) => {
-    if (status === "Won") return "bg-green-100 text-green-700";
-    if (status === "Lost") return "bg-red-100 text-red-600";
-    return "bg-yellow-100 text-yellow-700";
+    switch (status) {
+      case "New":
+        return "bg-blue-100 text-blue-700";
+
+      case "Proposal Sent":
+        return "bg-purple-100 text-purple-700";
+
+      case "In Progress":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "Completed":
+        return "bg-green-100 text-green-700";
+
+      case "Won":
+        return "bg-green-100 text-green-700";
+
+      case "Lost":
+        return "bg-red-100 text-red-600";
+
+      default:
+        return "bg-gray-100 text-gray-600";
+    }
   };
 
   if (loading)
@@ -89,15 +109,40 @@ export default function DealsPage() {
         </button>
 
       </div>
+      <div className="w-[30%]">
+        <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-white focus-within:ring-2 focus-within:ring-black/5 transition">
 
-      {/* SEARCH */}
-      <input
-        placeholder="Search deals..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
-      />
+          {/* ICON */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16 10a6 6 0 11-12 0 6 6 0 0112 0z" />
+          </svg>
 
+          {/* INPUT */}
+          <input
+            placeholder="Search deals..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full outline-none text-sm placeholder:text-gray-400"
+          />
+
+          {/* CLEAR BUTTON */}
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="text-gray-400 hover:text-gray-600 text-xs"
+            >
+              ✕
+            </button>
+          )}
+
+        </div>
+      </div>
       {/* CARD */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
 
@@ -126,7 +171,7 @@ export default function DealsPage() {
                   <tr
                     key={deal._id}
                     onClick={() => router.push(`/deals/${deal._id}`)}
-                    className="border-t hover:bg-gray-50 cursor-pointer transition"
+                    className="border-t border-gray-200  hover:bg-gray-50 cursor-pointer transition"
                   >
 
                     {/* DEAL */}
