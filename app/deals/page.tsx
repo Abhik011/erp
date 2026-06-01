@@ -103,7 +103,7 @@ export default function DealsPage() {
 
         <button
           onClick={() => router.push("/deals/new")}
-          className="bg-[#f7e414] text-black px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90"
+          className="bg-gradient-to-br from-[#7c5cff] to-[#5b4bdb] text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90"
         >
           + New Deal
         </button>

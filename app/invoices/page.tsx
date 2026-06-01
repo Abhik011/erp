@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { useUser } from "@clerk/nextjs";
 import { useCompany } from "@/components/CompanyProvider";
 import InvoiceRenderer from "@/components/invoice/InvoiceRenderer";
 export default function InvoicesPage() {
-  const { ready, companyId } = useCompany();
+  const { user, isLoaded } = useUser();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [filtered, setFiltered] = useState<any[]>([]);
   const [search, setSearch] = useState("");
@@ -19,14 +20,14 @@ export default function InvoicesPage() {
   const [payMethod, setPayMethod] = useState("Cash");
   const [payNote, setPayNote] = useState("");
   useEffect(() => {
-    if (!ready || !companyId) return;
+    if (!isLoaded || !user) return;
 
     apiFetch("/invoices")
       .then((res) => res.json())
       .then((data) => {
         const list = Array.isArray(data) ? data : [];
         const sorted = list.sort(
-          (a: any, b: any) =>
+          (a, b) =>
             new Date(b.createdAt).getTime() -
             new Date(a.createdAt).getTime()
         );
@@ -35,7 +36,7 @@ export default function InvoicesPage() {
         setFiltered(sorted);
         setLoading(false);
       });
-  }, [ready, companyId]);
+  }, [isLoaded, user]);
 
   // SEARCH
   useEffect(() => {
@@ -117,7 +118,7 @@ export default function InvoicesPage() {
 
         <Link
           href="/invoices/new"
-          className="bg-[#f7e414] text-black px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90"
+          className="bg-gradient-to-br from-[#7c5cff] to-[#5b4bdb] text-white px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90"
         >
           + New Invoice
         </Link>

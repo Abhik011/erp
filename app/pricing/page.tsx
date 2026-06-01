@@ -83,8 +83,8 @@ export default function PricingPage() {
           Simple plans that scale with you
         </h1>
         <p className="text-gray-600 mt-3 text-sm sm:text-base">
-          Sell Creonox CRM as a hosted SaaS: each company is isolated, with
-          usage limits by tier. Connect Stripe to charge monthly subscriptions.
+          Creonox ERP is multi-tenant: each company is isolated, with usage
+          limits by tier. Connect Stripe to charge monthly subscriptions.
         </p>
         {!API_BASE && (
           <p className="text-amber-800 text-sm mt-4">

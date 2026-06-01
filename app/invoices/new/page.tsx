@@ -83,8 +83,8 @@ function normalizeInvoice(raw: any) {
 }
 
 export default function InvoiceView() {
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id"); // 🔥 from query
+    const params = useParams();
+    const id = params.id; // 🔥 from route params
     const isNew = !id;
     const router = useRouter();
     const { ready, companyId } = useCompany();
@@ -233,11 +233,10 @@ export default function InvoiceView() {
             ...prev,
 
             customer: c,
-
+            _id: c._id, // 🔥 ADD THIS
             customerGSTIN: c.gstNumber || "",
 
-            projectName: c.companyName || c.name || "",
-
+            projectName: c.ProjectName || "",
             // OPTIONAL
             projectDescription: `Project for ${c.companyName || c.name}`,
         }));
@@ -309,6 +308,7 @@ export default function InvoiceView() {
             ...prev,
 
             customer: {
+                _id: c._id, // 🔥 ADD THIS
                 name: c.name || "",
                 companyName: c.companyName || "",
                 email: c.email || "",
@@ -462,8 +462,15 @@ export default function InvoiceView() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
+            const result = await res.json();
+            if (!res.ok) {
+                if (result.code === "PLAN_LIMIT") {
+                    alert(result.message); // later replace with modal
+                    return; // 🚨 STOP execution
+                }
 
-            if (!res.ok) throw new Error(`Save failed: HTTP ${res.status}`);
+                throw new Error(result.message || "Something went wrong");
+            }
 
             alert("Invoice saved successfully.");
         } catch (err: any) {

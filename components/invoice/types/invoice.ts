@@ -1,4 +1,4 @@
-type Invoice = {
+export type Invoice = {
     _id?: string;
     invoiceNumber?: string;
     issueDate?: string;
@@ -14,8 +14,9 @@ type Invoice = {
         email?: string;
         phone?: string;
         website?: string;
+        upiId?: string;
     };
-
+    paidAmount?: number;
     agencyGSTIN?: string;
 
     customer?: {
@@ -46,6 +47,8 @@ type Invoice = {
         label: string;
         percent: number;
         paid: boolean;
+        amount?: number;
+        paidAmount?: number;
     }[];
 
     bankDetails?: {

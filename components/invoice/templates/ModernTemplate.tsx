@@ -46,10 +46,10 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
 
         lineItems: (invoice.items || []).map((i, idx) => ({
             id: idx,
-            description: `${i.name}\n${i.description || ""}`,
-            quantity: i.quantity,
+            description: `${i.name || ""}\n${i.description || ""}`,
+            quantity: i.quantity ?? 0,
             unit: "",
-            rate: i.rate,
+            rate: i.rate ?? 0,
         })),
 
         discount: {
@@ -65,8 +65,8 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
         notes: invoice.notes,
     };
     // Calculate amounts
-    const calculateLineItemAmount = (item) => item.quantity * item.rate;
-    const subtotal = invoiceData.lineItems.reduce((sum, item) => sum + calculateLineItemAmount(item), 0);
+    const calculateLineItemAmount = (item: { quantity: number; rate: number }) => item.quantity * item.rate;
+    const subtotal = invoiceData.lineItems.reduce((sum, item) => sum + calculateLineItemAmount(item as { quantity: number; rate: number }), 0);
     const discountAmount =
         invoiceData.discount.type === 'percentage'
             ? (subtotal * invoiceData.discount.value) / 100
@@ -86,16 +86,23 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
     const grandTotal = taxableAmount + cgst + sgst + igst;
 
     // Format currency
-    const formatCurrency = (amount) => {
+    const formatCurrency = (amount: string | number | bigint | undefined) => {
+        const numericAmount =
+            amount === undefined || amount === null
+                ? 0
+                : typeof amount === 'string'
+                    ? Number(amount)
+                    : amount;
+
         return new Intl.NumberFormat('en-IN', {
             style: 'currency',
             currency: 'INR',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-        }).format(amount);
+        }).format(numericAmount);
     };
 
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string | number | Date | undefined) => {
         if (!dateString) return "-";
         return new Date(dateString).toLocaleDateString("en-IN", {
             year: "numeric",
@@ -104,7 +111,7 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
         });
     };
 
-    const getStatusColor = (status) => {
+    const getStatusColor = (status: string | undefined) => {
         switch (status) {
             case 'paid':
                 return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -119,7 +126,7 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
         }
     };
 
-    const getStatusLabel = (status) => {
+    const getStatusLabel = (status: string | undefined) => {
         switch (status) {
             case 'paid':
                 return 'PAID';
@@ -137,7 +144,7 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
         const upiId = invoice?.agency?.upiId || "yourupi@upi";
 
         return `upi://pay?pa=${upiId}&pn=${encodeURIComponent(
-            invoiceData?.agency?.name || "Company"
+            invoiceData?.company?.name || "Company"
         )}&am=${grandTotal}&cu=INR`;
     };
     const paidMilestones = invoiceData.milestones.filter(
@@ -528,108 +535,108 @@ export default function ModernTemplate({ invoice }: { invoice: Invoice }) {
                                     </span>
 
                                 </div>
-                               
-                            <div className="mt-4 space-y-2 bg-green-50 p-3 rounded">
 
-                                {/* Paid */}
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Paid Amount</span>
-                                    <span className="font-semibold text-emerald-600">
-                                        {formatCurrency(paidAmount)}
-                                    </span>
+                                <div className="mt-4 space-y-2 bg-green-50 p-3 rounded">
+
+                                    {/* Paid */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Paid Amount</span>
+                                        <span className="font-semibold text-emerald-600">
+                                            {formatCurrency(paidAmount)}
+                                        </span>
+                                    </div>
+
+                                    {/* Balance */}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Balance Due</span>
+                                        <span className="font-semibold text-red-600">
+                                            {formatCurrency(balanceAmount)}
+                                        </span>
+                                    </div>
+
                                 </div>
 
-                                {/* Balance */}
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Balance Due</span>
-                                    <span className="font-semibold text-red-600">
-                                        {formatCurrency(balanceAmount)}
-                                    </span>
+                                {/* GRAND TOTAL */}
+                                <div className="border-t-2 border-violet-600 pt-3 mt-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">
+                                            Grand Total
+                                        </span>
+                                        <span className="text-3xl font-bold text-violet-600">
+                                            {formatCurrency(grandTotal)}
+                                        </span>
+                                    </div>
                                 </div>
 
                             </div>
+                        </div>
 
-                            {/* GRAND TOTAL */}
-                            <div className="border-t-2 border-violet-600 pt-3 mt-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">
-                                        Grand Total
-                                    </span>
-                                    <span className="text-3xl font-bold text-violet-600">
-                                        {formatCurrency(grandTotal)}
-                                    </span>
-                                </div>
+                    </div>
+
+                    {/* Bank Details */}
+                    <div className="p-8 border-b border-gray-100  bg-gradient-to-r from-slate-50 to-slate-100">
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-4">
+                            Bank Details for Payment
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <p className="text-xs text-gray-600 mb-1">Account Name</p>
+                                <p className="text-sm font-medium uppercase text-gray-900">
+                                    {invoiceData.bankDetails?.accountName || "-"}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-600 mb-1">Account Number</p>
+                                <p className="text-sm font-medium text-gray-900  font-mono">
+                                    {invoiceData.bankDetails?.accountNumber || "-"}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-600 mb-1">IFSC Code</p>
+                                <p className="text-sm font-medium uppercase text-gray-900 font-mono">
+                                    {invoiceData.bankDetails?.ifsc || "-"}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-600 mb-1">Bank Name</p>
+                                <p className="text-sm font-medium uppercase text-gray-900">
+                                    {invoiceData.bankDetails?.bankName || "-"}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Notes Section */}
+                    <div className="p-8 border-b border-gray-100">
+                        <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-3">
+                            Notes & Terms
+                        </p>
+                        <p className="text-sm text-gray-700 leading-relaxed">{invoiceData.notes}</p>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-8 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-gray-100">
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <p className="text-xs text-gray-600 mb-6">Authorized Signatory</p>
+                                <div className="w-32 h-16 border-b-2 border-gray-400 flex items-end"></div>
                             </div>
 
-                        </div>
-                    </div>
-
-                </div>
-
-                {/* Bank Details */}
-                <div className="p-8 border-b border-gray-100  bg-gradient-to-r from-slate-50 to-slate-100">
-                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-4">
-                        Bank Details for Payment
-                    </p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                            <p className="text-xs text-gray-600 mb-1">Account Name</p>
-                            <p className="text-sm font-medium uppercase text-gray-900">
-                                {invoiceData.bankDetails.accountName || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-600 mb-1">Account Number</p>
-                            <p className="text-sm font-medium text-gray-900  font-mono">
-                                {invoiceData.bankDetails.accountNumber || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-600 mb-1">IFSC Code</p>
-                            <p className="text-sm font-medium uppercase text-gray-900 font-mono">
-                                {invoiceData.bankDetails?.ifsc || "-"}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-gray-600 mb-1">Bank Name</p>
-                            <p className="text-sm font-medium uppercase text-gray-900">
-                                {invoiceData.bankDetails.bank || "-"}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Notes Section */}
-                <div className="p-8 border-b border-gray-100">
-                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-widest mb-3">
-                        Notes & Terms
-                    </p>
-                    <p className="text-sm text-gray-700 leading-relaxed">{invoiceData.notes}</p>
-                </div>
-
-                {/* Footer */}
-                <div className="p-8 bg-gradient-to-r from-slate-50 to-slate-100 border-t border-gray-100">
-                    <div className="flex justify-between items-end">
-                        <div>
-                            <p className="text-xs text-gray-600 mb-6">Authorized Signatory</p>
-                            <div className="w-32 h-16 border-b-2 border-gray-400 flex items-end"></div>
-                        </div>
-
-                        <div className="text-right">
-                            <p className="text-xs text-gray-600 text-center mb-2">
-                                This is a system-generated invoice
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                Generated on {formatDate(new Date().toISOString().split('T')[0])}
-                            </p>
+                            <div className="text-right">
+                                <p className="text-xs text-gray-600 text-center mb-2">
+                                    This is a system-generated invoice
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    Generated on {formatDate(new Date().toISOString().split('T')[0])}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-            {/* Print Styles */ }
-    <style>{`
+            {/* Print Styles */}
+            <style>{`
         @media print {
           body {
             background: white;

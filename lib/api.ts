@@ -1,5 +1,13 @@
-export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+"use client";
 
+import { getToken } from "@clerk/nextjs";
+// ─────────────────────────────────────────────
+// API BASE
+// ─────────────────────────────────────────────
+export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+// ─────────────────────────────────────────────
+// Workspace selection (synced with Clerk-backed agency from the API)
+// ─────────────────────────────────────────────
 const STORAGE_KEY = "creonox_company_id";
 
 export function getCompanyId(): string | null {
@@ -13,11 +21,35 @@ export function setCompanyId(id: string) {
   window.dispatchEvent(new Event("company-changed"));
 }
 
-export function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  const p = path.startsWith("/") ? path : `/${path}`;
-  const url = `${API_BASE}${p}`;
-  const headers = new Headers(init?.headers);
-  const id = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-  if (id) headers.set("X-Company-Id", id);
-  return fetch(url, { ...init, headers });
+export function clearCompanyId() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+  window.dispatchEvent(new Event("company-changed"));
 }
+
+// ─────────────────────────────────────────────
+// API FETCH (CLERK AUTH ENABLED)
+// ─────────────────────────────────────────────
+export const apiFetch = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
+  try {
+    // 🔥 Get Clerk token safely
+    const token = await getToken();
+
+    const res = await fetch(`${API_BASE}${url}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+
+    return res;
+  } catch (err) {
+    console.error("API Fetch Error:", err);
+    throw err;
+  }
+};

@@ -11,7 +11,7 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f0ede9] flex">
+    <div className="min-h-screen bg-[#f3f2f1] flex">
 
       {/* Sidebar */}
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
